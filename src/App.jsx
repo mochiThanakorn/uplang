@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { WordTypeBadge, WordTypeLegend, ExampleSentence } from "@/components/learning-cues";
 import { cn } from "@/lib/utils";
 import { Stats } from "./Stats";
 import { Admin } from "./Admin";
@@ -47,22 +48,24 @@ function Progress({ summary }) {
   const displayProgress = progress < 0.1 && progress > 0 ? "<0.1" : Number(progress.toFixed(1));
   return <aside className="progress-stack" aria-label="ความคืบหน้า">
     <Card className="p-5">
-      <div className="flex items-center gap-2.5"><span className="stat-icon bg-neutral-100 text-primary"><Layers3 size={17} /></span><h2 className="font-semibold">ความคืบหน้า</h2><span className="ml-auto text-xs text-muted-foreground">รอบ {round}</span></div>
+      <div className="flex items-center gap-2.5"><span className="stat-icon cue-learning"><Layers3 size={17} /></span><h2 className="font-semibold">ความคืบหน้า</h2><span className="ml-auto text-xs text-muted-foreground">รอบ {round}</span></div>
       <div className="mt-5 flex items-baseline gap-1.5"><strong className="metric">{format.format(learned)}</strong><span className="text-sm text-muted-foreground">/ {format.format(total)} คำ</span></div>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-100" role="progressbar" aria-label="คำที่ตอบถูกในรอบนี้" aria-valuenow={learned} aria-valuemax={total}>
-        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%`, minWidth: learned ? 4 : 0 }} />
+      <div className="learning-progress mt-3 h-2 overflow-hidden rounded-full" role="progressbar" aria-label="คำที่ตอบถูกในรอบนี้" aria-valuenow={learned} aria-valuemax={total}>
+        <div className="learning-progress-fill h-full rounded-full transition-all" style={{ width: `${progress}%`, minWidth: learned ? 4 : 0 }} />
       </div>
       <div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>ตอบถูกในรอบนี้</span><span className="font-semibold text-primary">{displayProgress}%</span></div>
-      <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-sm"><span className="flex items-center gap-2 text-muted-foreground"><RotateCcw size={15} />รอทบทวน</span><strong>{format.format(review)}</strong></div>
+      <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-sm"><span className="review-label flex items-center gap-2"><RotateCcw size={15} />รอทบทวน</span><strong>{format.format(review)}</strong></div>
     </Card>
     <Card className="flex items-center gap-3 p-4">
-      <span className="stat-icon size-10 bg-neutral-100 text-neutral-800"><Flame size={20} /></span>
+      <span className="stat-icon size-10 cue-streak"><Flame size={20} /></span>
       <div><p className="text-sm font-semibold">ตอบถูกต่อเนื่อง</p><p className="mt-0.5 text-xs text-muted-foreground">จำนวนข้อที่ตอบถูกติดกัน</p></div>
       <strong className="ml-auto text-2xl tabular-nums">{format.format(streak)}</strong>
     </Card>
     <div className="guide">
       <div className="flex items-center gap-2 font-semibold text-neutral-900"><CircleHelp size={17} /> วิธีฝึก</div>
       <p className="mt-2 text-sm leading-relaxed text-neutral-600">คำที่ตอบผิดจะสุ่มกลับมาให้ลองใหม่ ส่วนคำที่ตอบถูกจะพักไว้จนจบรอบ</p>
+      <div className="learning-key"><span><CircleCheck size={15} /> ตอบถูก</span><span><RotateCcw size={15} /> รอทบทวน</span></div>
+      <div className="word-type-guide"><p className="text-sm font-semibold">แยกชนิดคำด้วยสี</p><WordTypeLegend /></div>
     </div>
   </aside>;
 }
@@ -227,10 +230,10 @@ function QuizApp({ session }) {
                   <h2 ref={questionHeading} tabIndex={-1} className="word-title" lang="en">{question.word}</h2>
                   <Button size="icon" variant="outline" className="speaker" onClick={speak} aria-label={`ฟังการออกเสียง ${question.word}`}><Volume2 size={19} /></Button>
                 </div>
-                <div className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1"><span lang="en" className="pos">{question.pos}</span>{question.context && <span lang="en" className="pos">{question.context}</span>}</div>
+                <div className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1"><WordTypeBadge pos={question.pos} />{question.context && <span lang="en" className="pos">{question.context}</span>}</div>
                 {question.example && <div className="example-panel">
                   <p className="text-xs font-semibold text-primary">ประโยคตัวอย่าง</p>
-                  <p className="mt-1.5 text-base leading-relaxed" lang="en">{question.example}</p>
+                  <p className="mt-1.5 text-base leading-relaxed" lang="en"><ExampleSentence text={question.example} word={question.word} /></p>
                   {result?.exampleTh && (
                     <div className="mt-3 border-t border-border pt-3" lang="th">
                       <p className="text-xs font-semibold text-primary">คำแปลภาษาไทย</p>
@@ -250,7 +253,7 @@ function QuizApp({ session }) {
                       <span className="choice-index" aria-hidden="true">{key}</span>
                       <span lang="th">{label}</span>
                       {highlight === "right" && <Check className="ml-auto shrink-0" size={16} aria-label="คำตอบที่ถูก" />}
-                      {highlight === "wrong" && <X className="ml-auto shrink-0" size={16} aria-label="คำตอบที่เลือก" />}
+                      {highlight === "wrong" && <X className="ml-auto shrink-0" size={16} aria-label="คำตอบที่เลือกยังไม่ถูก" />}
                     </Button>;
                   })}
                 </div>

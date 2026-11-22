@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Check, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { WordTypeBadge, ExampleSentence } from "@/components/learning-cues";
 import { loginWithGoogle } from "./api";
 
 const messages = {
@@ -38,18 +40,27 @@ export function Login({ loading, unavailable, anonymous }) {
     <section className="login-story" aria-label="เกี่ยวกับ Uplang">
       <div className="login-brand"><BookOpen aria-hidden="true" /><span className="brand-name">uplang.</span></div>
       <div className="login-story-content">
-        <p className="eyebrow" lang="en">A LITTLE PRACTICE. EVERY DAY.</p>
-        <h1 lang="en">Small steps.<br /><em>More words.</em><br />Bigger world.</h1>
-        <p>เปิดโลกให้กว้างขึ้น ด้วยคำศัพท์วันละนิด<br />ฝึกภาษาอังกฤษจาก Oxford 5000 ในจังหวะของคุณ</p>
+        <Badge variant="outline" className="login-intro-badge">คำศัพท์ใหม่ โลกใบใหม่</Badge>
+        <h1 lang="en">A new word.<br /><em>A new possibility.</em></h1>
+        <p>ค่อย ๆ เรียนรู้ แล้วไปได้ไกลกว่าเดิม<br />ฝึกคำศัพท์ Oxford 5000 ในจังหวะของคุณ</p>
+        <Card className="login-word-preview" aria-label="ตัวอย่างคำศัพท์">
+          <div className="preview-word-meta"><span lang="en">A WORD TO START YOUR DAY</span><Badge variant="outline">B2</Badge></div>
+          <div className="preview-word-heading"><span lang="en">possibility</span><Volume2 size={20} aria-hidden="true" /></div>
+          <div className="preview-word-pos"><WordTypeBadge pos="noun" /><span lang="th">ความเป็นไปได้</span></div>
+          <p className="preview-word-example" lang="en"><ExampleSentence text="Every new word opens up a new possibility." word="possibility" /></p>
+          <div className="preview-word-caption"><Check size={16} aria-hidden="true" /> เริ่มจากคำเดียว แล้วค่อย ๆ เติบโตไปทุกวัน</div>
+        </Card>
       </div>
       <div className="login-story-footer"><span>OXFORD 5000</span><span>พื้นที่เล็ก ๆ สำหรับการเรียนรู้ทุกวัน</span></div>
     </section>
     <section className="login-main" aria-label="เข้าสู่ระบบ">
       <Card className="login-card">
         <CardHeader>
-          <p className="eyebrow" lang="en">WELCOME TO UPLANG</p>
-          <CardTitle>เริ่มต้นคำศัพท์ใหม่วันนี้</CardTitle>
-          <CardDescription>เข้าสู่ระบบเพื่อฝึกคำศัพท์และติดตามความก้าวหน้าของคุณ</CardDescription>
+          <span className="login-welcome-icon" aria-hidden="true"><BookOpen size={23} /></span>
+          <p className="eyebrow" lang="en">YOUR NEXT CHAPTER STARTS HERE</p>
+          <CardTitle>ยินดีต้อนรับสู่ uplang.</CardTitle>
+          <CardDescription>ให้การฝึกภาษาเป็นช่วงเวลาดี ๆ ของทุกวัน
+            เข้าสู่ระบบเพื่อเริ่มเรียนรู้และเก็บความคืบหน้า</CardDescription>
         </CardHeader>
         <CardContent>
           {anonymous && <p className="mb-5 text-sm leading-relaxed text-muted-foreground">เชื่อมบัญชี Google ใหม่เพื่อเก็บความคืบหน้าจากโหมดผู้เยี่ยมชมบนเบราว์เซอร์นี้</p>}
