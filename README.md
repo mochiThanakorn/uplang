@@ -67,13 +67,13 @@ node scripts/set-admin.mjs uplang-98cca admin@example.com grant
 
 ### Deploy อัตโนมัติจาก GitHub Actions
 
-เมื่อ push หรือ merge เข้า `main` workflow จะทดสอบและ build ด้วย Node.js 22 แล้ว deploy Firestore rules/indexes, Function `quizApi` และ Hosting ไปยัง `uplang-98cca`
+เมื่อ push หรือ merge เข้า `dev` workflow จะทดสอบและ build ด้วย Node.js 22 แล้ว deploy Firestore rules/indexes, Function `quizApi` และ Hosting ไปยัง `uplang-98cca`
 
-1. ใน GitHub สร้าง Environment ชื่อ `production` และตั้ง **Deployment branches and tags** ให้ใช้ได้จาก `main`
-2. เพิ่ม Environment variables ทั้งสี่ตัว `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` และ `VITE_FIREBASE_APP_ID` จาก Firebase Web App เดียวกับที่ใช้ใน `beta`
-3. เพิ่ม Environment secret ชื่อ `FIREBASE_PRODUCTION_DEPLOY_SA` โดยใช้ JSON ของ service account สำหรับ deploy โดยเฉพาะ บัญชีนี้ต้องมีสิทธิ์ deploy Firebase Hosting, Cloud Functions, Firestore indexes และ Security Rules รวมถึงสิทธิ์ใช้งาน service account ที่รัน Function
+1. ใน GitHub ใช้ Environment ชื่อ `beta` และตั้ง **Deployment branches and tags → Selected branches and tags** ให้ deploy ได้จาก branch `dev` เท่านั้น
+2. เพิ่ม Environment variables ทั้งสี่ตัว `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` และ `VITE_FIREBASE_APP_ID` จาก Firebase Web App ของ `uplang-98cca` ใน Environment `beta`
+3. เพิ่ม Environment secret ใน `beta` ชื่อ `FIREBASE_PRODUCTION_DEPLOY_SA` โดยใช้ JSON ของ service account สำหรับ deploy โดยเฉพาะ บัญชีนี้ต้องมีสิทธิ์ deploy Firebase Hosting, Cloud Functions, Firestore indexes และ Security Rules รวมถึงสิทธิ์ใช้งาน service account ที่รัน Function
 
-PR Preview ใช้ Environment `beta` และ deploy เฉพาะ Hosting Preview การเปิด Google Sign-in และการให้สิทธิ์แอดมินยังตั้งค่าแยกจาก workflow
+PR Preview ใช้ Environment `preview` และ deploy เฉพาะ Hosting Preview ให้คัดลอก Variables ทั้งสี่ตัวจาก `beta` ไปที่ `preview` และใช้ Secret สำหรับ Hosting Preview ชื่อ `FIREBASE_SERVICE_ACCOUNT_UPLANG_98CCA` การเปิด Google Sign-in และการให้สิทธิ์แอดมินยังตั้งค่าแยกจาก workflow
 
 หาก Firebase CLI แจ้งว่ายังไม่มีนโยบายล้างอิมเมจของ Cloud Functions ให้ผู้ดูแลตั้งนโยบายครั้งเดียวด้วย `firebase functions:artifacts:setpolicy --project uplang-98cca --location asia-southeast1`
 
