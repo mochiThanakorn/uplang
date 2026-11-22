@@ -65,11 +65,17 @@ node scripts/set-admin.mjs uplang-98cca admin@example.com grant
 
 ออกจากระบบแล้วเข้าสู่ระบบใหม่เพื่อรับสิทธิ์และเปิดเมนูแอดมิน ใช้ `revoke` เพื่อยกเลิกสิทธิ์ใน token ที่ออกใหม่ ส่วน token ที่ออกไปแล้วใช้ได้จนหมดอายุ เซิร์ฟเวอร์ตรวจ claim `admin` ใน ID token ทุกครั้งก่อนอ่านรายชื่อหรือประวัติของผู้ใช้อื่น
 
-GitHub Actions เดิม deploy เฉพาะ Hosting สำหรับการอัปเดตนี้ ให้เปิด Google ใน Firebase ก่อน แล้ว deploy Function และ Hosting ด้วย build ที่มีค่า Firebase:
+### Deploy อัตโนมัติจาก GitHub Actions
 
-```sh
-firebase deploy --project uplang-98cca --only functions:quizApi,hosting
-```
+เมื่อ push หรือ merge เข้า `main` workflow จะทดสอบและ build ด้วย Node.js 22 แล้ว deploy Firestore rules/indexes, Function `quizApi` และ Hosting ไปยัง `uplang-98cca`
+
+1. ใน GitHub สร้าง Environment ชื่อ `production` และตั้ง **Deployment branches and tags** ให้ใช้ได้จาก `main`
+2. เพิ่ม Environment variables ทั้งสี่ตัว `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` และ `VITE_FIREBASE_APP_ID` จาก Firebase Web App เดียวกับที่ใช้ใน `beta`
+3. เพิ่ม Environment secret ชื่อ `FIREBASE_PRODUCTION_DEPLOY_SA` โดยใช้ JSON ของ service account สำหรับ deploy โดยเฉพาะ บัญชีนี้ต้องมีสิทธิ์ deploy Firebase Hosting, Cloud Functions, Firestore indexes และ Security Rules รวมถึงสิทธิ์ใช้งาน service account ที่รัน Function
+
+PR Preview ใช้ Environment `beta` และ deploy เฉพาะ Hosting Preview การเปิด Google Sign-in และการให้สิทธิ์แอดมินยังตั้งค่าแยกจาก workflow
+
+หาก Firebase CLI แจ้งว่ายังไม่มีนโยบายล้างอิมเมจของ Cloud Functions ให้ผู้ดูแลตั้งนโยบายครั้งเดียวด้วย `firebase functions:artifacts:setpolicy --project uplang-98cca --location asia-southeast1`
 
 ## กติกา
 
