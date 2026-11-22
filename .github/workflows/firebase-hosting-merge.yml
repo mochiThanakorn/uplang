@@ -1,9 +1,9 @@
-name: Deploy Firebase on dev
+name: Deploy Firebase on main
 
 on:
   push:
     branches:
-      - dev
+      - main
 
 permissions:
   contents: read
