@@ -68,12 +68,14 @@ export function createQuiz(catalog) {
   function view(state) {
     if (!state.current) return { question: null, result: null, summary: summary(state) };
     const { id, wordId, options, selected } = state.current;
-    const { word, pos, level, meaningTh, context, example } = words.get(wordId);
+    const { word, pos, level, meaningTh, context, example, exampleTh } = words.get(wordId);
+    const correct = options.find((option) => option.id === wordId).key;
     return {
       // Resolve labels from the catalog so saved questions also use Thai choices.
       question: { id, word, pos, level, context, example, options: options.map(({ key, id }) => ({ key, label: words.get(id).meaningTh })) },
       result: selected === undefined ? null : {
-        selected, correct: options.find((option) => option.id === wordId).key, meaning: meaningTh,
+        selected, correct, meaning: meaningTh,
+        ...(selected === correct ? { exampleTh } : {}),
       },
       summary: summary(state),
     };

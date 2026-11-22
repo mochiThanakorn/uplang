@@ -39,7 +39,6 @@ export function Login({ loading, unavailable, anonymous }) {
       <span className="grid size-12 place-items-center rounded-xl bg-primary text-white" aria-hidden="true"><BookOpen size={24} /></span>
       <p className="brand-name mt-5">uplang<span>.</span></p>
       <h1 className="mt-3 text-2xl font-semibold">เข้าสู่ระบบ</h1>
-      <p className="mt-2 text-muted-foreground">ใช้บัญชี Google เพื่อบันทึกความคืบหน้าและดูประวัติคำศัพท์ได้จากทุกอุปกรณ์</p>
       {anonymous && <p className="mt-3 text-sm text-muted-foreground">เชื่อมบัญชี Google ใหม่เพื่อเก็บความคืบหน้าจากโหมดผู้เยี่ยมชมบนเบราว์เซอร์นี้</p>}
       {loading ? <p className="mt-6" role="status">กำลังตรวจสอบบัญชี…</p>
         : unavailable ? <p className="mt-6" role="alert">ยังไม่ได้ตั้งค่า Firebase สำหรับเว็บไซต์นี้</p>

@@ -5,12 +5,13 @@ import { createQuiz, QuizError } from "./quiz.js";
 
 const quiz = createQuiz(catalog);
 
-test("every word has a Thai translation and an English example", () => {
+test("every word has a Thai meaning and a translated example", () => {
   for (const entry of catalog) {
     assert.match(entry.meaningTh, /[\u0e00-\u0e7f]/, entry.word);
     assert(entry.example.trim().split(/\s+/).length >= 4, entry.word);
     assert.match(entry.example, /[.!?]["']?$/, entry.word);
     assert(entry.exampleSource, entry.word);
+    assert.match(entry.exampleTh, /[\u0e00-\u0e7f]/, entry.word);
   }
 });
 
@@ -23,6 +24,8 @@ test("saved questions resolve Thai options without resetting progress", () => {
   assert.equal(response.question.example, catalog.find((entry) => entry.id === state.current.wordId).example);
   assert(response.question.options.every((option) => /[\u0e00-\u0e7f]/.test(option.label)));
   assert.match(response.result.meaning, /[\u0e00-\u0e7f]/);
+  assert.equal(response.result.exampleTh, catalog.find((entry) => entry.id === state.current.wordId).exampleTh);
+  assert.equal(quiz.run(state, "question").response.result.exampleTh, response.result.exampleTh);
   assert.equal(response.summary.correct, 1);
   assert.equal(response.summary.learned, 1);
 });
@@ -74,6 +77,7 @@ test("wrong answers reveal the correct choice, count once and return after other
   const first = smallQuiz.run(state, "answer", { id, choice: wrong }).response;
   assert.equal(first.result.correct, right);
   assert.equal(first.result.selected, wrong);
+  assert.equal(first.result.exampleTh, undefined);
   assert.equal(first.summary.review, 1);
   assert.equal(first.summary.seen, 1);
   assert.equal(first.summary.learned, 0);
