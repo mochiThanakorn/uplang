@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Search, Target, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 const PAGE_SIZE = 12;
@@ -31,9 +32,9 @@ export function Stats({ data, loading, readOnly = false }) {
   return <>
     <div className="stats-metrics">
       {[
-        { label: "ตอบถูก", value: number.format(correct), Icon: Check, tone: "bg-emerald-100 text-emerald-700" },
-        { label: "ตอบผิด", value: number.format(wrong), Icon: X, tone: "bg-rose-100 text-rose-700" },
-        { label: "ความแม่นยำ", value: total ? `${Math.round((correct / total) * 100)}%` : "—", Icon: Target, tone: "bg-violet-100 text-primary" },
+        { label: "ตอบถูก", value: number.format(correct), Icon: Check, tone: "bg-neutral-900 text-white" },
+        { label: "ตอบผิด", value: number.format(wrong), Icon: X, tone: "bg-neutral-100 text-muted-foreground" },
+        { label: "ความแม่นยำ", value: total ? `${Math.round((correct / total) * 100)}%` : "—", Icon: Target, tone: "bg-neutral-100 text-primary" },
       ].map(({ label, value, Icon, tone }) => <Card className="stat-summary" key={label}>
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><span className={`stat-icon ${tone}`}><Icon size={15} /></span>{label}</div><strong className="metric block pt-2">{value}</strong>
       </Card>)}
@@ -59,9 +60,9 @@ export function Stats({ data, loading, readOnly = false }) {
             <thead className="bg-muted text-left text-xs text-muted-foreground"><tr><th scope="col">คำศัพท์</th><th scope="col">ระดับ</th><th scope="col" className="text-right">ถูก</th><th scope="col" className="text-right">ผิด</th></tr></thead>
             <tbody>{visible.map((row) => <tr key={row.id} className="border-b border-border">
               <td lang="en"><div className="font-semibold">{row.word}</div><div className="text-xs text-muted-foreground">{row.pos}{row.context && ` · ${row.context}`}</div></td>
-              <td><span className="level">{row.level}</span></td>
-              <td className="text-right font-semibold tabular-nums text-emerald-700">{number.format(row.correct)}</td>
-              <td className="text-right font-semibold tabular-nums text-rose-700">{number.format(row.wrong)}</td>
+              <td><Badge variant="outline" className="level">{row.level}</Badge></td>
+              <td className="text-right font-semibold tabular-nums text-foreground">{number.format(row.correct)}</td>
+              <td className="text-right font-semibold tabular-nums text-muted-foreground">{number.format(row.wrong)}</td>
             </tr>)}</tbody>
           </table>
         </div>
@@ -73,7 +74,7 @@ export function Stats({ data, loading, readOnly = false }) {
           </div>
         </div>
       </> : <div className="grid place-items-center gap-3 px-4 py-12 text-center">
-        <span className="stat-icon size-11 bg-violet-100 text-primary"><BarChart3 size={20} /></span>
+        <span className="stat-icon size-11 bg-neutral-100 text-primary"><BarChart3 size={20} /></span>
         <p className="text-sm text-muted-foreground">{data.rows.length ? "ไม่พบคำศัพท์ที่ค้นหา" : readOnly ? "ผู้ใช้นี้ยังไม่ได้ตอบคำถาม" : "ตอบคำถามเพื่อเริ่มเก็บสถิติรายคำ"}</p>
         {!readOnly && !data.rows.length && <a href="#quiz" className="rounded-sm text-sm font-semibold text-primary hover:underline">ไปฝึกคำศัพท์</a>}
       </div>}
