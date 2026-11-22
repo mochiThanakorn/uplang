@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight, ArrowRight, AudioLines, BarChart3, BookOpen, Check, CircleCheck,
-  CircleHelp, Flame, Layers3, LogOut, RotateCcw, Shield, Sparkles, Volume2, X,
+  CircleHelp, Flame, Layers3, LogOut, RotateCcw, Shield, Sparkles, UserRound, Volume2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,6 +18,24 @@ function Brand() {
   return <div className="flex items-center gap-3">
     <span className="grid size-10 place-items-center rounded-xl bg-primary text-white shadow-sm" aria-hidden="true"><BookOpen size={21} strokeWidth={2.4} /></span>
     <div><div className="brand-name">uplang<span>.</span></div><div className="mt-1 text-[10px] font-semibold tracking-[.16em] text-muted-foreground">OXFORD 5000</div></div>
+  </div>;
+}
+
+function AccountProfile({ user, onLogout }) {
+  const [failedPhoto, setFailedPhoto] = useState(null);
+  const name = user.displayName?.trim() || user.email || "บัญชี Google";
+  const photo = user.photoURL;
+
+  return <div className="account-profile flex min-w-0 items-center justify-end gap-2">
+    <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-violet-100 text-primary">
+      {photo && photo !== failedPhoto
+        ? <img className="size-full object-cover" src={photo} alt="" referrerPolicy="no-referrer" onError={() => setFailedPhoto(photo)} />
+        : <UserRound size={17} aria-hidden="true" />}
+    </span>
+    <span className="min-w-0 truncate text-sm font-semibold" title={name}>{name}</span>
+    <Button variant="outline" className="shrink-0" aria-label="ออกจากระบบ" title="ออกจากระบบ" onClick={onLogout}>
+      <LogOut size={16} aria-hidden="true" /><span className="hidden lg:inline">ออกจากระบบ</span>
+    </Button>
   </div>;
 }
 
@@ -176,7 +194,7 @@ function QuizApp({ session }) {
           <a href="#stats" className={cn("nav-link", page === "stats" && "active")} aria-current={page === "stats" ? "page" : undefined}><BarChart3 size={17} /> สถิติ</a>
           {session?.admin && <a href="#admin" className={cn("nav-link", page === "admin" && "active")} aria-current={page === "admin" ? "page" : undefined}><Shield size={17} /> แอดมิน</a>}
         </nav>
-        {session ? <Button variant="outline" className="account-action justify-self-end" onClick={leave}><LogOut size={16} /> ออกจากระบบ</Button> : <span className="mode">โหมดในเครื่อง</span>}
+        {session ? <AccountProfile user={session.user} onLogout={leave} /> : <span className="mode">โหมดในเครื่อง</span>}
       </div>
     </header>
 
