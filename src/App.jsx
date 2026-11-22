@@ -261,7 +261,7 @@ function QuizApp({ session }) {
               </div>
             </Card>
             <div className="quiz-footer">
-              <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex"><kbd>1</kbd><span>ถึง</span><kbd>8</kbd><span className="ml-1">เพื่อเลือกคำตอบ</span></span>
+              <span className="keyboard-hint hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex"><kbd>1</kbd><span>ถึง</span><kbd>8</kbd><span className="ml-1">เพื่อเลือกคำตอบ</span></span>
               {result && <Button ref={actionButton} className="ml-auto" disabled={pending} onClick={next}>{summary.complete ? "เริ่มรอบใหม่" : "คำถัดไป"} <ArrowRight size={17} /></Button>}
             </div>
           </> : <Card className="grid min-h-64 place-items-center p-8 text-sm text-muted-foreground" role="status">{pending || !error ? "กำลังโหลดคำถาม…" : "ยังโหลดคำถามไม่ได้"}</Card>}
