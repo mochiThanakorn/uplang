@@ -67,9 +67,9 @@ node scripts/set-admin.mjs uplang-98cca admin@example.com grant
 
 ### Deploy อัตโนมัติจาก GitHub Actions
 
-เมื่อ push หรือ merge เข้า `dev` workflow จะทดสอบและ build ด้วย Node.js 22 แล้ว deploy Firestore rules/indexes, Function `quizApi` และ Hosting ไปยัง `uplang-98cca`
+เมื่อ push หรือ merge เข้า `main` workflow จะทดสอบและ build ด้วย Node.js 22 แล้ว deploy Firestore rules/indexes, Function `quizApi` และ Hosting ไปยัง `uplang-98cca`
 
-1. ใน GitHub ใช้ Environment ชื่อ `beta` และตั้ง **Deployment branches and tags → Selected branches and tags** ให้ deploy ได้จาก branch `dev` เท่านั้น
+1. ใน GitHub ใช้ Environment ชื่อ `beta` และตั้ง **Deployment branches and tags → Selected branches and tags** ให้ deploy ได้จาก branch `main` เท่านั้น
 2. เพิ่ม Environment variables ทั้งสี่ตัว `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` และ `VITE_FIREBASE_APP_ID` จาก Firebase Web App ของ `uplang-98cca` ใน Environment `beta`
 3. เพิ่ม Environment secret ใน `beta` ชื่อ `FIREBASE_PRODUCTION_DEPLOY_SA` โดยใช้ JSON ของ service account สำหรับ deploy โดยเฉพาะ บัญชีนี้ต้องมีสิทธิ์ deploy Firebase Hosting, Cloud Functions, Firestore indexes และ Security Rules รวมถึงสิทธิ์ใช้งาน service account ที่รัน Function
 
@@ -79,7 +79,7 @@ PR Preview ใช้ Environment `preview` และ deploy เฉพาะ Host
 
 ## กติกา
 
-- แต่ละข้อมีประโยคตัวอย่างภาษาอังกฤษและคำแปลภาษาไทย 8 ตัวเลือก รายการที่ตอบถูกจะออกจากการสุ่มจนเริ่มรอบใหม่
+- แต่ละข้อมีประโยคตัวอย่างภาษาอังกฤษและคำแปลภาษาไทย 8 ตัวเลือก ช้อยส์ใช้คำแปลสั้นและไม่ซ้ำกันในข้อเดียว ส่วนคำอธิบายเต็มจะแสดงหลังตอบ รายการที่ตอบถูกจะออกจากการสุ่มจนเริ่มรอบใหม่
 - คำที่ตอบผิดจะแสดงเฉลยและกลับเข้าไปในคิวสุ่มหลังทำคำอื่นอีก 3–7 ข้อ เมื่อเหลือเฉพาะคำท้ายรอบ ระบบจะเลือกคำอื่นที่เหลือก่อนเมื่อทำได้
 - รอบจบเมื่อตอบถูกครบทั้ง 5,000 รายการ กดเริ่มรอบใหม่ได้โดยยังเก็บสถิติสะสมเดิม
 - คำสะกดเหมือนกันที่เป็นคนละรายการในต้นฉบับจะใช้ชนิดคำหรือบริบทแยกกัน จึงนับเป็น 5,000 รายการคำศัพท์ตามความหมาย
@@ -92,4 +92,6 @@ PR Preview ใช้ Environment `preview` และ deploy เฉพาะ Host
 
 `functions/data/oxford.json` พร้อมใช้งานในโปรเจกต์ ถ้าต้องการสร้างไฟล์ใหม่ ให้ส่งข้อความที่แยกจาก PDF ตามลำดับคอลัมน์ให้ `python3 scripts/build-catalog.py oxford3000.txt oxford5000.txt WordNet-3.0/dict` ดูสัญญาอนุญาต WordNet ใน `functions/data/WORDNET-LICENSE.txt`
 
-สคริปต์สร้างรายการจะรักษาคำแปลและประโยคตัวอย่างจากไฟล์เดิมตามคำศัพท์ ชนิดคำ และบริบท หากมีรายการใหม่ที่ยังไม่มีข้อมูลส่วนนี้ สคริปต์จะหยุดแทนการเขียนทับข้อมูลที่พร้อมใช้งาน
+ฟิลด์ `choiceTh` เก็บคำแปลสั้นสำหรับช้อยส์ แยกจาก `meaningTh` ที่ใช้แสดงความหมายเต็มหลังตอบ หากไม่มี `choiceTh` จะใช้ `meaningTh` โดยรายการปัจจุบันมีคำแปลสำหรับช้อยส์ยาวไม่เกิน 60 ตัวอักษร คำถามเก่าที่มีช้อยส์ซึ่งย่อแล้วซ้ำกันจะยังใช้ความหมายเต็มเฉพาะช้อยส์เหล่านั้น เพื่อไม่ให้กำกวมและยังตอบต่อได้ด้วยความคืบหน้าเดิม
+
+สคริปต์สร้างรายการจะรักษาคำแปล คำแปลสั้น และประโยคตัวอย่างจากไฟล์เดิมตามคำศัพท์ ชนิดคำ และบริบท หากมีรายการใหม่ที่ยังไม่มีข้อมูลส่วนที่จำเป็น สคริปต์จะหยุดแทนการเขียนทับข้อมูลที่พร้อมใช้งาน

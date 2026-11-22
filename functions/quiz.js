@@ -1,6 +1,7 @@
 const OPTION_COUNT = 8;
 const freshRound = () => ({ seen: 0, learned: 0, steps: 0, words: {} });
 const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
+const choiceLabel = (word) => (word.choiceTh ?? word.meaningTh).trim();
 
 export class QuizError extends Error {
   constructor(status, message) {
@@ -31,17 +32,17 @@ export function createQuiz(catalog) {
     const word = randomItem(alternatives.length ? alternatives : pool);
     const similar = catalog.filter((entry) => entry.pos === word.pos);
     const distractors = [...similar, ...catalog.filter((entry) => entry.pos !== word.pos)];
-    const options = [{ id: word.id, label: word.meaningTh }];
-    const labels = new Set([word.meaningTh.trim()]);
+    const options = [{ id: word.id, label: choiceLabel(word) }];
+    const labels = new Set([choiceLabel(word)]);
     for (let i = 0; i < distractors.length && options.length < OPTION_COUNT; i++) {
       const end = i < similar.length ? similar.length : distractors.length;
       const j = i + Math.floor(Math.random() * (end - i));
       [distractors[i], distractors[j]] = [distractors[j], distractors[i]];
       const other = distractors[i];
-      const label = other.meaningTh.trim();
+      const label = choiceLabel(other);
       if (other.word === word.word || labels.has(label)) continue;
       labels.add(label);
-      options.push({ id: other.id, label: other.meaningTh });
+      options.push({ id: other.id, label });
     }
     for (let i = options.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -70,12 +71,19 @@ export function createQuiz(catalog) {
     const { id, wordId, options, selected } = state.current;
     const { word, pos, level, meaningTh, context, example, exampleTh } = words.get(wordId);
     const correct = options.find((option) => option.id === wordId).key;
+    const labels = options.map(({ id }) => choiceLabel(words.get(id)));
+    const publicOptions = options.map(({ key, id }, index) => ({
+      key,
+      // Older saved questions may contain synonyms that now share a short label.
+      // Keep their full meanings so the choices remain distinguishable.
+      label: labels.indexOf(labels[index]) !== labels.lastIndexOf(labels[index])
+        ? words.get(id).meaningTh : labels[index],
+    }));
     return {
-      // Resolve labels from the catalog so saved questions also use Thai choices.
-      question: { id, word, pos, level, context, example, options: options.map(({ key, id }) => ({ key, label: words.get(id).meaningTh })) },
+      // Resolve current labels without changing saved choice keys or progress.
+      question: { id, word, pos, level, context, example, options: publicOptions },
       result: selected === undefined ? null : {
-        selected, correct, meaning: meaningTh,
-        ...(selected === correct ? { exampleTh } : {}),
+        selected, correct, meaning: meaningTh, exampleTh,
       },
       summary: summary(state),
     };

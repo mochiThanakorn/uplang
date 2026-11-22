@@ -72,10 +72,11 @@ def main():
     # Keep the Thai translations and examples when rebuilding the Oxford list.
     output = ROOT / "functions/data/oxford.json"
     learning_fields = ("meaningTh", "example", "exampleSource", "exampleTh")
+    preserved_fields = (*learning_fields, "choiceTh")
     def learning_key(entry):
         return entry["word"], entry["pos"], entry.get("context", "")
     learning = {
-        learning_key(entry): {key: entry[key] for key in learning_fields if key in entry}
+        learning_key(entry): {key: entry[key] for key in preserved_fields if key in entry}
         for entry in json.loads(output.read_text())
     } if output.exists() else {}
     wordnet = read_wordnet(args.wordnet_dict)
