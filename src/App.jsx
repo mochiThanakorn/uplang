@@ -231,6 +231,12 @@ function QuizApp({ session }) {
                 {question.example && <div className="example-panel">
                   <p className="text-xs font-semibold text-primary">ประโยคตัวอย่าง</p>
                   <p className="mt-1.5 text-base leading-relaxed" lang="en">{question.example}</p>
+                  {result && result.selected === result.correct && result.exampleTh && (
+                    <div className="mt-3 border-t border-border pt-3" lang="th">
+                      <p className="text-xs font-semibold text-primary">คำแปลภาษาไทย</p>
+                      <p className="mt-1.5 text-base leading-relaxed">{result.exampleTh}</p>
+                    </div>
+                  )}
                 </div>}
                 {audioError && <p className="mt-2 text-xs text-muted-foreground" role="status">เบราว์เซอร์นี้เล่นเสียงคำศัพท์ไม่ได้</p>}
               </div>
