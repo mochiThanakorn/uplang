@@ -71,7 +71,7 @@ def main():
     args = parser.parse_args()
     # Keep the Thai translations and examples when rebuilding the Oxford list.
     output = ROOT / "functions/data/oxford.json"
-    learning_fields = ("meaningTh", "example", "exampleSource")
+    learning_fields = ("meaningTh", "example", "exampleSource", "exampleTh")
     def learning_key(entry):
         return entry["word"], entry["pos"], entry.get("context", "")
     learning = {
