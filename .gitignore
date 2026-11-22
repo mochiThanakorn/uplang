@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output and test coverage
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local environment variables
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Firebase cache and local configuration
+.firebase/
+.runtimeconfig.json
+
+# Logs
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db

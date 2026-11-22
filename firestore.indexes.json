@@ -1,0 +1,6 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "quizUsers", "fieldPath": "state", "indexes": [] }
+  ]
+}
