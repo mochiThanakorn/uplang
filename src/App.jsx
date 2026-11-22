@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight, ArrowRight, AudioLines, BarChart3, BookOpen, Check, CircleCheck,
-  CircleHelp, Cloud, Flame, Layers3, RotateCcw, Sparkles, Volume2, X,
+  CircleHelp, Flame, Layers3, LogOut, RotateCcw, Shield, Sparkles, Volume2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Stats } from "./Stats";
-import { api, isConfigured, isDemo } from "./api";
+import { Admin } from "./Admin";
+import { Login } from "./Login";
+import { api, isConfigured, isDemo, logout, watchSession } from "./api";
 
 const format = new Intl.NumberFormat("en-US");
 const empty = { total: 5000, learned: 0, seen: 0, review: 0, streak: 0, round: 1 };
@@ -46,12 +48,44 @@ function Progress({ summary }) {
 }
 
 export function App() {
-  const [page, setPage] = useState(location.hash === "#stats" ? "stats" : "quiz");
+  const [session, setSession] = useState(undefined);
+
+  useEffect(() => {
+    if (!isConfigured) return;
+    let generation = 0;
+    const unsubscribe = watchSession(async (user) => {
+      const current = ++generation;
+      if (!user || user.isAnonymous) {
+        setSession({ user, admin: false });
+        return;
+      }
+      setSession((previous) => previous?.user?.uid === user.uid ? previous : { user, admin: false });
+      const token = await user.getIdTokenResult().catch(() => null);
+      if (current === generation) setSession({ user, admin: token?.claims.admin === true });
+    });
+    return () => { generation++; unsubscribe(); };
+  }, []);
+
+  if (isDemo) return <QuizApp />;
+  if (!isConfigured) return <Login unavailable />;
+  if (!session) return <Login loading />;
+  if (!session.user || session.user.isAnonymous) return <Login anonymous={session.user?.isAnonymous} />;
+  return <QuizApp key={session.user.uid} session={session} />;
+}
+
+function currentPage() {
+  if (location.hash === "#admin") return "admin";
+  return location.hash === "#stats" ? "stats" : "quiz";
+}
+
+function QuizApp({ session }) {
+  const [page, setPage] = useState(currentPage);
   const [data, setData] = useState(null);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
   const [pending, setPending] = useState(false);
   const [audioError, setAudioError] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
   const busy = useRef(false);
   const questionHeading = useRef(null);
   const actionButton = useRef(null);
@@ -78,7 +112,7 @@ export function App() {
           setData(current);
         } catch { /* Keep the previous question visible while the user retries. */ }
       }
-      setError(failure.code ? "เข้าสู่ระบบไม่ได้ กรุณาตรวจการตั้งค่า Firebase Authentication" : failure.message);
+      setError(failure.message);
     } finally {
       setPending(false);
       busy.current = false;
@@ -86,13 +120,13 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    const onHashChange = () => setPage(location.hash === "#stats" ? "stats" : "quiz");
+    const onHashChange = () => setPage(currentPage());
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
   useEffect(() => {
-    if ((isConfigured || isDemo) && !pending && loadedPage.current !== page) {
+    if (page !== "admin" && !pending && loadedPage.current !== page) {
       loadedPage.current = page;
       void load(page === "stats" ? "stats" : "question");
     }
@@ -128,7 +162,11 @@ export function App() {
     window.speechSynthesis.speak(speech);
   }
 
-  const available = isDemo || isConfigured;
+  async function leave() {
+    setLogoutError(false);
+    try { await logout(); } catch { setLogoutError(true); }
+  }
+
   return <div className="app">
     <header className="topbar">
       <div className="topbar-inner">
@@ -136,25 +174,29 @@ export function App() {
         <nav className="navigation" aria-label="เมนูหลัก">
           <a href="#quiz" className={cn("nav-link", page === "quiz" && "active")} aria-current={page === "quiz" ? "page" : undefined}><BookOpen size={17} /> ฝึกคำศัพท์</a>
           <a href="#stats" className={cn("nav-link", page === "stats" && "active")} aria-current={page === "stats" ? "page" : undefined}><BarChart3 size={17} /> สถิติ</a>
+          {session?.admin && <a href="#admin" className={cn("nav-link", page === "admin" && "active")} aria-current={page === "admin" ? "page" : undefined}><Shield size={17} /> แอดมิน</a>}
         </nav>
-        <span className="mode"><Cloud size={15} /> {isDemo ? "โหมดในเครื่อง" : "Oxford 5000"}</span>
+        {session ? <Button variant="outline" className="account-action justify-self-end" onClick={leave}><LogOut size={16} /> ออกจากระบบ</Button> : <span className="mode">โหมดในเครื่อง</span>}
       </div>
     </header>
 
+    {logoutError && <p className="mx-auto mt-4 text-sm text-rose-800" role="alert">ออกจากระบบไม่สำเร็จ กรุณาลองใหม่</p>}
+    {page === "admin" ? <main className="layout wide-layout">
+      {session?.admin ? <Admin /> : <Card className="p-6">หน้านี้สำหรับผู้ดูแลระบบ</Card>}
+    </main> :
     <main className="layout">
       <div className="content">
         <div className="page-heading">
           <div className="heading-mark" aria-hidden="true">{page === "quiz" ? <Sparkles size={21} /> : <BarChart3 size={21} />}</div>
           <div><h1>{page === "quiz" ? "ฝึกคำศัพท์" : "สถิติคำศัพท์"}</h1>
-            <p>{page === "quiz" ? "อ่านประโยคตัวอย่าง แล้วเลือกคำแปลภาษาไทยที่ตรงกับคำศัพท์" : "ดูจำนวนครั้งที่ตอบถูกและผิดของแต่ละคำ"}</p></div>
+            <p>{page === "quiz" ? "อ่านประโยคตัวอย่าง แล้วเลือกคำแปลภาษาไทยที่ตรงกับคำศัพท์" : session?.user.email ?? "ดูจำนวนครั้งที่ตอบถูกและผิดของแต่ละคำ"}</p></div>
         </div>
 
-        {available && error && <Card className="mb-4 flex flex-wrap items-center justify-between gap-3 border-rose-200 p-4 text-sm text-rose-800" role="alert">
+        {error && <Card className="mb-4 flex flex-wrap items-center justify-between gap-3 border-rose-200 p-4 text-sm text-rose-800" role="alert">
           {error}<Button variant="outline" onClick={() => load(page === "stats" ? "stats" : "question")}>โหลดใหม่</Button>
         </Card>}
 
-        {!available ? <Card className="p-8"><h2 className="text-lg font-semibold">ตั้งค่า Firebase เพื่อเริ่มใช้งาน</h2><p className="mt-2 text-sm text-muted-foreground">ใส่ค่า Firebase Web App ในไฟล์ .env.local แล้ว build โปรเจกต์อีกครั้ง</p></Card>
-          : page === "stats" ? <Stats data={stats} loading={pending || !error} />
+        {page === "stats" ? <Stats data={stats} loading={pending || !error} />
           : question ? <>
             <Card className="quiz-card">
               <div className="word-panel">
@@ -200,7 +242,7 @@ export function App() {
           </> : <Card className="grid min-h-64 place-items-center p-8 text-sm text-muted-foreground" role="status">{pending || !error ? "กำลังโหลดคำถาม…" : "ยังโหลดคำถามไม่ได้"}</Card>}
       </div>
       <Progress summary={selectedSummary} />
-    </main>
+    </main>}
 
     <footer className="site-footer"><span>Uplang</span><a href="https://www.oxfordlearnersdictionaries.com/about/wordlists/oxford3000-5000" target="_blank" rel="noreferrer">รายการคำศัพท์ Oxford 5000 <ArrowUpRight size={13} /></a></footer>
   </div>;

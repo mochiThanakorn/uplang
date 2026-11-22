@@ -42,7 +42,7 @@ Vite ส่งต่อ `/api/*` ไปยัง Hosting Emulator ที่พ�
 ## Deploy ไป Firebase Hosting
 
 1. สร้างโปรเจกต์ Firebase ที่ใช้แผน Blaze สำหรับ Cloud Functions Gen 2 สร้าง Web App และฐานข้อมูล Cloud Firestore แบบ default แนะนำ location `asia-southeast1` เพื่อให้ตรงกับตำแหน่งของ Function
-2. เปิด **Authentication → Sign-in method → Anonymous** แล้วคัดลอก `.env.example` เป็น `.env.local` กรอกค่า Web App และให้ `VITE_FIREBASE_EMULATORS=false`
+2. เปิด **Authentication → Sign-in method → Google** เลือกอีเมลติดต่อของโปรเจกต์ และตรวจโดเมนของเว็บใน **Authentication → Settings → Authorized domains** สำหรับ build ในเครื่องให้สร้าง `.env.local` โดยใช้ชื่อตัวแปรทั้งสี่ตามตัวอย่างด้านบนและค่าจาก Firebase Web App พร้อมตั้ง `VITE_FIREBASE_EMULATORS=false`
 3. รันคำสั่งต่อไปนี้โดยแทน `YOUR_PROJECT_ID` ด้วย Firebase Project ID
 
 ```sh
@@ -51,7 +51,25 @@ npm run build
 firebase deploy --project YOUR_PROJECT_ID --only firestore,functions,hosting
 ```
 
-Firebase Hosting ส่งต่อ `/api/**` ให้ Function `quizApi` บน Node.js 22 ตัว Function ตรวจ Firebase ID token และอัปเดตคำถาม ผลคำตอบ และสถิติต่อผู้ใช้ภายใน Firestore transaction ฐานข้อมูลเก็บความคืบหน้าตามบัญชี Anonymous ของเบราว์เซอร์ การล้างข้อมูลเว็บไซต์หรือเปลี่ยนเบราว์เซอร์จะสร้างบัญชีใหม่
+Firebase Hosting ส่งต่อ `/api/**` ให้ Function `quizApi` บน Node.js 22 ตัว Function ตรวจ Firebase ID token และอัปเดตคำถาม ผลคำตอบ และสถิติต่อผู้ใช้ภายใน Firestore transaction ฐานข้อมูลแยกความคืบหน้าตาม Firebase UID ของบัญชี Google ผู้ใช้กลับมาใช้บัญชีเดิมจากเครื่องอื่นได้ หน้าแอดมินแสดงอีเมลและประวัติรายคำหลังผู้ใช้เปิดหน้าฝึกหรือสถิติครั้งแรก
+
+ผู้เยี่ยมชมเดิมสามารถเชื่อมบัญชี Google ที่ยังไม่เคยใช้กับแอปเพื่อเก็บ UID และประวัติเดิมของเบราว์เซอร์ได้ ถ้าเลือกบัญชี Google ที่มีอยู่ในแอปแล้ว ระบบจะเปิดประวัติของบัญชีนั้น โดยไม่รวมประวัติโหมดผู้เยี่ยมชม
+
+### สิทธิ์แอดมิน
+
+ให้ผู้ดูแลเข้าสู่ระบบด้วย Google ครั้งแรกก่อน จากนั้นรันด้วย Google Application Default Credentials ที่มีสิทธิ์จัดการผู้ใช้ Firebase Authentication ของโปรเจกต์
+
+```sh
+node scripts/set-admin.mjs uplang-98cca admin@example.com grant
+```
+
+ออกจากระบบแล้วเข้าสู่ระบบใหม่เพื่อรับสิทธิ์และเปิดเมนูแอดมิน ใช้ `revoke` เพื่อยกเลิกสิทธิ์ใน token ที่ออกใหม่ ส่วน token ที่ออกไปแล้วใช้ได้จนหมดอายุ เซิร์ฟเวอร์ตรวจ claim `admin` ใน ID token ทุกครั้งก่อนอ่านรายชื่อหรือประวัติของผู้ใช้อื่น
+
+GitHub Actions เดิม deploy เฉพาะ Hosting สำหรับการอัปเดตนี้ ให้เปิด Google ใน Firebase ก่อน แล้ว deploy Function และ Hosting ด้วย build ที่มีค่า Firebase:
+
+```sh
+firebase deploy --project uplang-98cca --only functions:quizApi,hosting
+```
 
 ## กติกา
 

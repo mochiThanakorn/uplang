@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 const PAGE_SIZE = 12;
 const number = new Intl.NumberFormat("en-US");
 
-export function Stats({ data, loading }) {
+export function Stats({ data, loading, readOnly = false }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("wrong");
   const [page, setPage] = useState(0);
@@ -74,8 +74,8 @@ export function Stats({ data, loading }) {
         </div>
       </> : <div className="grid place-items-center gap-3 px-4 py-12 text-center">
         <span className="stat-icon size-11 bg-violet-100 text-primary"><BarChart3 size={20} /></span>
-        <p className="text-sm text-muted-foreground">{data.rows.length ? "ไม่พบคำศัพท์ที่ค้นหา" : "ตอบคำถามเพื่อเริ่มเก็บสถิติรายคำ"}</p>
-        {!data.rows.length && <a href="#quiz" className="rounded-sm text-sm font-semibold text-primary hover:underline">ไปฝึกคำศัพท์</a>}
+        <p className="text-sm text-muted-foreground">{data.rows.length ? "ไม่พบคำศัพท์ที่ค้นหา" : readOnly ? "ผู้ใช้นี้ยังไม่ได้ตอบคำถาม" : "ตอบคำถามเพื่อเริ่มเก็บสถิติรายคำ"}</p>
+        {!readOnly && !data.rows.length && <a href="#quiz" className="rounded-sm text-sm font-semibold text-primary hover:underline">ไปฝึกคำศัพท์</a>}
       </div>}
     </Card>
   </>;

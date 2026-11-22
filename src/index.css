@@ -113,3 +113,11 @@ th, td { padding: 10px 15px; }
   .stats-metrics .stat-icon { display: none; }
   th, td { padding-inline: 8px; }
 }
+
+.wide-layout { grid-template-columns: minmax(0, 1fr); }
+
+@media (max-width: 700px) {
+  .topbar-inner:has(.account-action) { grid-template-columns: minmax(0, 1fr) auto; }
+  .topbar-inner:has(.account-action) .navigation { grid-area: 2 / 1 / 3 / -1; justify-self: center; }
+  .account-action { grid-area: 1 / 2; }
+}
