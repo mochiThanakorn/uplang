@@ -24,7 +24,7 @@ function useAdminData(path) {
 }
 
 function LoadError({ result }) {
-  return <div className="flex flex-wrap items-center gap-3 text-rose-800" role="alert">
+  return <div className="flex flex-wrap items-center gap-3 text-foreground" role="alert">
     {result.error}<Button variant="outline" onClick={result.retry}>ลองอีกครั้ง</Button>
   </div>;
 }
@@ -47,7 +47,7 @@ export function Admin() {
         : list.data.users.length ? <>
           <ul className="divide-y divide-border">
             {list.data.users.map(({ uid, email }) => <li key={uid}>
-              <button type="button" className="w-full break-all rounded px-3 py-2 text-left hover:bg-muted aria-pressed:bg-violet-100"
+              <button type="button" className="w-full break-all rounded px-3 py-2 text-left hover:bg-muted aria-pressed:bg-neutral-100"
                 aria-pressed={uid === selected} onClick={() => setSelected(uid)}>{email}</button>
             </li>)}
           </ul>
