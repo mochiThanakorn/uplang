@@ -38,7 +38,7 @@ export function Login({ loading, unavailable, anonymous }) {
 
   return <main className="login-layout">
     <section className="login-story" aria-label="เกี่ยวกับ Uplang">
-      <div className="login-brand"><BookOpen aria-hidden="true" /><span className="brand-name">uplang.</span></div>
+      <div className="login-brand"><BookOpen aria-hidden="true" /><span className="brand-name">uplang.</span><Badge variant="outline" className="login-collection">Oxford 5000</Badge></div>
       <div className="login-story-content">
         <Badge variant="outline" className="login-intro-badge">คำศัพท์ใหม่ โลกใบใหม่</Badge>
         <h1 lang="en">A new word.<br /><em>A new possibility.</em></h1>
@@ -59,8 +59,7 @@ export function Login({ loading, unavailable, anonymous }) {
           <span className="login-welcome-icon" aria-hidden="true"><BookOpen size={23} /></span>
           <p className="eyebrow" lang="en">YOUR NEXT CHAPTER STARTS HERE</p>
           <CardTitle>ยินดีต้อนรับสู่ uplang.</CardTitle>
-          <CardDescription>ให้การฝึกภาษาเป็นช่วงเวลาดี ๆ ของทุกวัน
-            เข้าสู่ระบบเพื่อเริ่มเรียนรู้และเก็บความคืบหน้า</CardDescription>
+          <CardDescription>ฝึกคำศัพท์วันละนิด และเก็บความคืบหน้าไว้ในบัญชีของคุณ</CardDescription>
         </CardHeader>
         <CardContent>
           {anonymous && <p className="mb-5 text-sm leading-relaxed text-muted-foreground">เชื่อมบัญชี Google ใหม่เพื่อเก็บความคืบหน้าจากโหมดผู้เยี่ยมชมบนเบราว์เซอร์นี้</p>}
