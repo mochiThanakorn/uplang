@@ -54,7 +54,7 @@ export function Stats({ data, loading, readOnly = false }) {
         </div>
       </div>
       {visible.length ? <>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="ตารางประวัติรายคำ">
           <table className="w-full border-collapse text-sm">
             <thead className="bg-muted text-left text-xs text-muted-foreground"><tr><th scope="col">คำศัพท์</th><th scope="col">ระดับ</th><th scope="col" className="text-right">ถูก</th><th scope="col" className="text-right">ผิด</th></tr></thead>
             <tbody>{visible.map((row) => <tr key={row.id} className="border-b border-border">
@@ -67,7 +67,7 @@ export function Stats({ data, loading, readOnly = false }) {
         </div>
         <div className="flex items-center justify-between gap-2 px-4 py-3 text-xs text-muted-foreground">
           <span>{number.format(index * PAGE_SIZE + 1)}–{number.format(index * PAGE_SIZE + visible.length)} จาก {number.format(filtered.length)} คำ</span>
-          <div className="flex gap-2">
+          <div className="stats-pagination flex shrink-0 gap-2">
             <Button size="icon" variant="outline" aria-label="หน้าก่อนหน้า" disabled={index === 0} onClick={() => setPage(index - 1)}><ArrowLeft size={16} /></Button>
             <Button size="icon" variant="outline" aria-label="หน้าถัดไป" disabled={index === lastPage} onClick={() => setPage(index + 1)}><ArrowRight size={16} /></Button>
           </div>
