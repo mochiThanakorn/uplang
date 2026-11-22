@@ -8,11 +8,42 @@ const quiz = createQuiz(catalog);
 test("every word has a Thai meaning and a translated example", () => {
   for (const entry of catalog) {
     assert.match(entry.meaningTh, /[\u0e00-\u0e7f]/, entry.word);
+    const label = entry.choiceTh ?? entry.meaningTh;
+    assert.match(label, /[\u0e00-\u0e7f]/, entry.word);
+    assert(label.length <= 60, `${entry.word}: choice is too long`);
     assert(entry.example.trim().split(/\s+/).length >= 4, entry.word);
     assert.match(entry.example, /[.!?]["']?$/, entry.word);
     assert(entry.exampleSource, entry.word);
     assert.match(entry.exampleTh, /[\u0e00-\u0e7f]/, entry.word);
   }
+});
+
+test("compact choices replace saved labels while the result retains the full meaning", () => {
+  const { state } = quiz.run(null, "question");
+  const water = catalog.find((entry) => entry.word === "water");
+  state.current.wordId = water.id;
+  state.current.options = [{ key: "1", id: water.id, label: water.meaningTh }];
+  const { response } = answer(state, true);
+  assert.equal(response.question.options[0].label, "น้ำ");
+  assert.equal(response.result.meaning, water.meaningTh);
+});
+
+test("saved choices that now share a compact translation stay distinguishable", () => {
+  const entries = catalog.slice(0, 8).map((entry, i) => ({
+    ...entry, choiceTh: i < 2 ? "คำแปลเดียวกัน" : `คำแปล ${i}`,
+    meaningTh: `ความหมายเต็ม ${i}`,
+  }));
+  const savedQuiz = createQuiz(entries);
+  const { state } = savedQuiz.run(null, "question");
+  state.current.options = entries.map((entry, i) => ({ key: String(i + 1), id: entry.id }));
+  const questionId = state.current.id;
+  const { response } = savedQuiz.run(state, "question");
+  assert.equal(response.question.id, questionId);
+  assert.equal(new Set(response.question.options.map(({ label }) => label)).size, 8);
+  assert.equal(response.question.options[0].label, entries[0].meaningTh);
+  assert.equal(response.question.options[1].label, entries[1].meaningTh);
+  assert.deepEqual(response.question.options.map(({ key }) => key), state.current.options.map(({ key }) => key));
+  assert.equal(response.summary.seen, 0);
 });
 
 test("saved questions resolve Thai options without resetting progress", () => {
@@ -49,6 +80,7 @@ test("all 5,000 entries are answered once, then a new round retains lifetime sta
     seen.add(state.current.wordId);
     assert.equal(response.question.options.length, 8);
     assert.equal(new Set(response.question.options.map((option) => option.label.toLowerCase())).size, 8);
+    assert(response.question.options.every((option) => option.label.length <= 60));
     assert.equal(response.result, null);
     assert(response.question.options.every((option) => Object.keys(option).sort().join() === "key,label"));
 
@@ -77,7 +109,7 @@ test("wrong answers reveal the correct choice, count once and return after other
   const first = smallQuiz.run(state, "answer", { id, choice: wrong }).response;
   assert.equal(first.result.correct, right);
   assert.equal(first.result.selected, wrong);
-  assert.equal(first.result.exampleTh, undefined);
+  assert.equal(first.result.exampleTh, catalog.find((entry) => entry.id === wordId).exampleTh);
   assert.equal(first.summary.review, 1);
   assert.equal(first.summary.seen, 1);
   assert.equal(first.summary.learned, 0);
