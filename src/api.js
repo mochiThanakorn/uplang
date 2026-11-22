@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { connectAuthEmulator, getAuth, signInAnonymously } from "firebase/auth";
+import { connectAuthEmulator, getAuth, GoogleAuthProvider, linkWithPopup, onIdTokenChanged, signInWithPopup, signOut } from "firebase/auth";
 
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,13 +16,21 @@ if (auth && import.meta.env.VITE_FIREBASE_EMULATORS === "true") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 }
 
-let pendingSignIn;
-async function getUser() {
-  await auth.authStateReady();
-  if (auth.currentUser) return auth.currentUser;
-  pendingSignIn ??= signInAnonymously(auth).then((credential) => credential.user)
-    .finally(() => { pendingSignIn = undefined; });
-  return pendingSignIn;
+export function watchSession(callback) {
+  return onIdTokenChanged(auth, callback);
+}
+
+export function loginWithGoogle(useExistingAccount = false) {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  const user = auth.currentUser;
+  return user?.isAnonymous && !useExistingAccount
+    ? linkWithPopup(user, provider)
+    : signInWithPopup(auth, provider);
+}
+
+export function logout() {
+  return signOut(auth);
 }
 
 export async function api(action, input) {
@@ -31,8 +39,11 @@ export async function api(action, input) {
     return demoApi(action, input);
   }
 
-  const token = await (await getUser()).getIdToken();
+  const user = auth?.currentUser;
+  if (!user || user.isAnonymous) throw new Error("กรุณาเข้าสู่ระบบด้วย Google");
+  const token = await user.getIdToken();
   const response = await fetch(`/api/${action}`, {
+    cache: "no-store",
     method: input ? "POST" : "GET",
     headers: { Authorization: `Bearer ${token}`, ...(input ? { "Content-Type": "application/json" } : {}) },
     body: input ? JSON.stringify(input) : undefined,
