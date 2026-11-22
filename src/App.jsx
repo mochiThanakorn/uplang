@@ -23,8 +23,9 @@ function Brand() {
 
 function AccountProfile({ user, onLogout }) {
   const [failedPhoto, setFailedPhoto] = useState(null);
-  const name = user.displayName?.trim() || user.email || "บัญชี Google";
-  const photo = user.photoURL;
+  const google = user.providerData.find((profile) => profile.providerId === "google.com");
+  const name = google?.displayName?.trim() || user.displayName?.trim() || user.email || "บัญชี Google";
+  const photo = google?.photoURL || user.photoURL;
 
   return <div className="account-profile flex min-w-0 items-center justify-end gap-2">
     <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-violet-100 text-primary">
